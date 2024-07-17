@@ -1,0 +1,214 @@
+// JavaScript Document
+//ddaccordion.init({
+//  headerclass: "submenuheader", //Shared CSS class name of headers group
+//  contentclass: "submenu", //Shared CSS class name of contents group
+//  revealtype: "click", //Reveal content when user clicks or onmouseover the header? Valid value: "click", "clickgo", or "mouseover"
+//  mouseoverdelay: 200, //if revealtype="mouseover", set delay in milliseconds before header expands onMouseover
+//  collapseprev: true, //Collapse previous content (so only one open at any time)? true/false 
+//  defaultexpanded: [], //index of content(s) open by default [index1, index2, etc] [] denotes no content
+//  onemustopen: false, //Specify whether at least one header should be open always (so never all headers closed)
+//  animatedefault: false, //Should contents open by default be animated into view?
+//  persiststate: true, //persist state of opened contents within browser session?
+//  toggleclass: ["", ""], //Two CSS classes to be applied to the header when it's collapsed and expanded, respectively ["class1", "class2"]
+//  togglehtml: ["suffix", "<img src='images/plus.gif' class='statusicon' />", "<img src='images/minus.gif' class='statusicon' />"], //Additional HTML added to the header when it's collapsed and expanded, respectively  ["position", "html1", "html2"] (see docs)
+//  animatespeed: "fast", //speed of animation: integer in milliseconds (ie: 200), or keywords "fast", "normal", or "slow"
+//  oninit:function(headers, expandedindices){ //custom code to run when headers have initalized
+//    //do nothing
+//  },
+//  onopenclose:function(header, index, state, isuseractivated){ //custom code to run whenever a header is opened or closed
+//    //do nothing
+//  }})
+
+$(document).ready(function() {  //alert(1234);
+  $('.ask').jConfirmAction();
+    $('.jclock').jclock();
+  var form = $('#AppStatus');
+  /////////////////  STEP 1 /////////////////////////
+  var appFormNum = $("#appFormNum");
+  appFormNum.alphanumeric({allow:"/-"});
+  appFormNum.focus();
+  var appFormNumInfo = $("#appFormNumInfo");
+  appFormNumInfo.hide();
+  var appEmail = $("#appEmail");
+  appEmail.alphanumeric({allow:"._@"});
+  var appEmailInfo = $("#appEmailInfo");
+  appEmailInfo.hide();
+  var appContact = $("#appContact");
+  appContact.numeric();
+  var appContactInfo = $("#appContactInfo");
+  appContactInfo.hide();
+  var passCode = $("#passCode");
+  passCode.alphanumeric();
+  var passCodeInfo = $("#passCodeInfo");
+  passCodeInfo.hide();
+  var appCaptcha = $("#appCaptcha");
+  appCaptcha.alphanumeric();
+  var appCaptchaInfo = $("#appCaptchaInfo");
+  appCaptchaInfo.hide();
+  
+  appFormNum.keyup(ValidateAppFormNum);
+  appFormNum.blur(ValidateAppFormNum);
+  appEmail.keyup(ValidateApplicantEmail);
+  appEmail.blur(ValidateApplicantEmail);
+  appContact.keyup(ValidateApplicantContact);
+  appContact.blur(ValidateApplicantContact);
+  passCode.keyup(ValidatePassword);
+  passCode.blur(ValidatePassword);
+  appCaptcha.keyup(ValidateCaptcha);
+  
+  $('#btnBack').click(function() {
+    appFormNum.val('');
+    appEmail.val('');
+    appContact.val('');
+    passCode.val('');
+    appCaptcha.val('');
+    return false; 
+  });
+  
+  $('#btnPrint').click(function() {
+    if(parseInt($.trim($('#printStatus').val())) > 0) {
+      var path = "print_bedreceipt.php?appsId="+$.trim($('#appId').val())+"&TB_iframe=true&height=550&width=850&modal=true";
+      //location.href = path;
+      tb_show(null,path,false);
+    } 
+  });
+  
+  $('#btnLock').click(function() {
+    var txt;
+    var r = confirm("Are you sure, you want to confirm the lock against "+$('#collegeNames'+$('[name="collegeId"]:checked').val()).val()+"!");
+    if (r == true) {
+      $('#action').val('Lock');
+      form.submit();
+      return true;
+    } else {
+      return false;
+    }   
+  });
+
+        $('#btnPrint').click(function() { //alert($('#benf_appid').val());
+    if(parseInt($.trim($('#benf_appid').val())) > 0) { 
+      var path = "print_bedreceipt.php?appsId="+$.trim($('#benf_appid').val())+"&TB_iframe=true&height=550&width=850&modal=true";
+      //location.href = path;
+      tb_show(null,path,false);
+    } 
+  });
+  
+  $('#btnSubmit').click(function() {
+    if(ValidateAppFormNum() & ValidateApplicantEmail() & ValidateApplicantContact() & ValidatePassword() & ValidateCaptcha()) {
+      $('#action').val('Success');
+      form.submit();
+      return true;
+//      alert("Success");
+//      return false;
+    } else {
+//      alert("Failure");
+      return false; 
+    }
+  });
+  
+  function ValidateAppFormNum() {
+    if($.trim(appFormNum.val()).length == 0) {
+      $('#appFormNumInfo').text('Please provide application id.');
+      $('#appFormNumInfo').show();
+      return false;
+    } else {
+      $('#appFormNumInfo').text('');
+      $('#appFormNumInfo').hide();
+      return true;
+    }
+  }
+  
+     function ValidateEmail(email) {
+        var expr = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        return expr.test(email);
+    };
+  
+  function ValidateApplicantEmail() {
+    return true;
+  
+    if($.trim(appEmail.val()).length == 0) {
+      $('#appEmailInfo').text('Please provide your authenticated email address.');
+      $('#appEmailInfo').show();
+      return false;
+    } else {
+      if(!ValidateEmail($.trim(appEmail.val()))) {
+        $('#appEmailInfo').text('Invalid authenticated email address provided');
+        $('#appEmailInfo').show();
+        return false;
+      } else {
+        $('#appEmailInfo').text('');
+        $('#appEmailInfo').hide();
+        return true;
+      }   
+    }
+  }
+  
+  function ValidateApplicantContact() {
+    if($.trim(appContact.val()).length == 0) {
+      $('#appContactInfo').text('Please provide your contact number.');
+      $('#appContactInfo').show();
+      return false;
+    } else {
+      if(isNaN($.trim(appContact.val())) || $.trim(appContact.val()).length < 10) {
+        $('#appContactInfo').text('Invalid contact number provided.');
+        $('#appContactInfo').show();
+        return false;
+      } else {
+        $('#appContactInfo').text('');
+        $('#appContactInfo').hide();
+        return true;
+      }
+    }
+  }
+  
+  function ValidatePassword() {
+    if($.trim(passCode.val()).length == 0) {
+      $('#passCodeInfo').text('Please provide authenticated password.');
+      $('#passCodeInfo').show();
+      return false;
+    } else {
+      if($.trim(passCode.val()).length < 8) {
+        $('#passCodeInfo').text('Invalid authenticated password provided');
+        $('#passCodeInfo').show();
+        return false;
+      } else {
+        $('#passCodeInfo').text('');
+        $('#passCodeInfo').hide();
+        return true;
+      }
+    }
+  }
+  
+  function ValidateCaptcha() {
+    if($.trim($('#appCaptcha').val()).length == 0) {
+      $('#appCaptchaInfo').text('Please provide captcha code.');
+      $('#appCaptchaInfo').show();
+      return false;
+    } else {
+      $('#appCaptchaInfo').text('');
+      $('#appCaptchaInfo').hide();
+      return true;
+    }
+  }
+
+  $("#btnCatChange").click(function(event) {
+    /* Act on the event */
+    if(ValidateCaptcha()){
+      if(confirm("Are you sure, you want to modify the category?")){
+        $("#catUpdateAction").val("updateCategory");
+        $("#AppStatus").submit();
+      }
+    }
+  });
+  $("#btnCancel").click(function(event) {
+    /* Act on the event */
+    window.location.href=window.location.href;
+  });
+
+  ///////APPLICATION PAYMENT PROCESS/////
+  $("[identifier='PAY_NOW']").click(function(event) {
+    /* Act on the event */
+    $("#payment_form").submit();
+  });
+  
+});
